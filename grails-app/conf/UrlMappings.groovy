@@ -6,7 +6,8 @@ class UrlMappings {
                 // apply constraints here
             }
         }
-
+		
+		"/file/$path**"(controller:"file/get")
         "/"(view:"/index")
         "500"(view:'/error')
 	}

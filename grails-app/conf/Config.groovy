@@ -20,3 +20,5 @@ log4j = {
            'org.hibernate',
            'net.sf.ehcache.hibernate'
 }
+
+grails.plugins.awsfiles.bucket = 'rad-content'

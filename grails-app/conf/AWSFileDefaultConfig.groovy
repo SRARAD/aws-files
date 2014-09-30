@@ -1,7 +1,0 @@
-grails {
-	plugin {
-		awsfile {
-			
-		}
-	}
-}

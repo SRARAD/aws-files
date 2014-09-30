@@ -1,0 +1,8 @@
+/target
+/target-eclipse
+/.settings
+/.classpath
+*.zip*
+/plugin.xml
+/bin
+/.project

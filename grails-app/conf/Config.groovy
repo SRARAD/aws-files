@@ -22,3 +22,9 @@ log4j = {
 }
 
 grails.plugins.awsfiles.bucket = 'rad-content'
+
+if (System.properties.getProperty("radcache")) {
+	grails.plugin.awsfiles.cacheLocation = System.properties.getProperty("radcache")
+}
+
+grails.app.context="/"

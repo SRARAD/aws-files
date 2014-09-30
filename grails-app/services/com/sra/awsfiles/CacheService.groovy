@@ -9,14 +9,13 @@ import com.sra.awsfiles.CacheRefreshJob
 @Transactional
 class CacheService {
 
-	def bucket="rad-content"
 	def grailsApplication
 	def inProgress=false
 
 	def updateCache() {
 		def results="" 
 		long t0=System.currentTimeMillis()
-		def cachedir=grailsApplication.mergedConfig.grails.plugin.awsfiles.cacheLocation;
+		def cachedir=getLoc();
 		def dir1=null
 		if (cachedir.startsWith("/") || cachedir.indexOf(":/")==1) {
 			dir1=new File(cachedir)
@@ -25,7 +24,7 @@ class CacheService {
 		}
 		def dir0=dir1.toString()
 		results+="<li>Using Local Cache Directory: "+dir0+"</li>"
-		results+="<li>Using S3 Bucket: "+bucket+"</li>"
+		results+="<li>Using S3 Bucket: "+grailsApplication.mergedConfig.grails.plugin.awsfiles.bucket+"</li>"
 		println("Calling updateCache...")
 		if (inProgress) {
 			println("Update cache already in progress...")
@@ -37,7 +36,7 @@ class CacheService {
 		ObjectListing list=null;
 		try {
 			while(true) {
-				list=s3.listObjects(bucket)
+				list=s3.listObjects(grailsApplication.mergedConfig.grails.plugin.awsfiles.bucket)
 				results+=processObjects(list)
 				if (list.isTruncated()) {
 					list=s3.listNextBatchOfObjects(list)
@@ -45,7 +44,6 @@ class CacheService {
 					break;
 				}
 			}
-			results+=doDynamicMediaUpdates(s3)
 		} catch (Exception e) {
 			e.printStackTrace()
 			results+="<li><pre>"
@@ -62,7 +60,7 @@ class CacheService {
 	}
 
 	def getCacheFile(String path) {
-		def cachedir=grailsApplication.mergedConfig.grails.plugin.awsfiles.cacheLocation;
+		def cachedir=getLoc();
 		def dir0=null
 		if (cachedir.startsWith("/") || cachedir.indexOf(":/")==1) {
 			dir0=cachedir
@@ -84,7 +82,7 @@ class CacheService {
 	}
 
 	def getCacheInfo(String path) {
-		def cachedir=grailsApplication.mergedConfig.grails.plugin.awsfiles.cacheLocation;
+		def cachedir=getLoc();
 		def dir1=null
 		if (cachedir.startsWith("/") || cachedir.indexOf(":/")==1) {
 			dir1=new File(cachedir)
@@ -146,6 +144,7 @@ class CacheService {
 	}
 
 	def refreshObject(String key,long size) {
+		def bucket = grailsApplication.mergedConfig.grails.plugin.awsfiles.bucket;
 		def results=""
 		def s3=new AmazonS3Client()
 		try {
@@ -175,6 +174,10 @@ class CacheService {
 			results+="<li>S3 Retrieval Failed For:"+key+"</li>"
 		}
 		return(results)
+	}
+	
+	def getLoc() {
+		grailsApplication.mergedConfig.grails.plugin.awsfiles.cacheLocation
 	}
 	
 	def startJob() {

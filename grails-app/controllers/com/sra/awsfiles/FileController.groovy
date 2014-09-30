@@ -4,14 +4,9 @@ import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.S3Object
 
 class FileController {
-	
-	def test() {
-		println 'Here'
-	}
 
-	def rangeSupport=false
-	def copyToCache=false
 	def grailsApplication
+	def cacheService
 
 	static def typeMap=['doc':'application/msword',
 		'png':'image/png',
@@ -42,6 +37,8 @@ class FileController {
 
 	//prepare for S3 direct fetch
 	def get(String path) {
+		def rangeSupport = grailsApplication.mergedConfig.grails.plugin.awsfiles.rangeSupport;
+		def copyToCache = grailsApplication.mergedConfig.grails.plugin.awsfiles.cache;
 		try {
 			//process Range header if present
 			String range=request.getHeader("Range")
@@ -80,22 +77,24 @@ class FileController {
 			//inline = play in browser
 			//attachment = download
 			String type="attachment"
-			if (filename.toLowerCase().endsWith(".txt") || filename.toLowerCase().endsWith(".pdf") || filename.toLowerCase().endsWith(".html")) {
+			def inlineTypes = grailsApplication.mergedConfig.grails.plugin.awsfiles.inline;
+			if (inlineTypes.any { filename.toLowerCase().endsWith("." + it) }) {
 				type="inline"
 			}
 			response.setHeader("Content-disposition",type+";filename="+filename)
-			if (filename.toLowerCase().endsWith(".html")) {
+			def transform = grailsApplication.mergedConfig.grails.plugin.awsfiles.transform;
+			def fileEnding = filename.toLowerCase().split("\\.").last();
+			if (transform[fileEnding]) {
 				int posdot=path.lastIndexOf(".")
-				def mdFile=getCacheFile(path.substring(0,posdot)+".md")
-				if (mdFile.exists()) {
-					return(["md":mdFile.text])
+				def transformed=getCacheFile(path.substring(0,posdot)+"."+transform[fileEnding])
+				if (transformed.exists()) {
+					return transformed.text // TO-DO
 				}
 			}
 			def cacheFile=getCacheFile(path)
 			if (cacheFile.exists()) {
-				if (filename.toLowerCase().endsWith(".html")) {
-					//special case for inlining html
-					return(["md":cacheFile.text])
+				if (transform[fileEnding]) {
+					return cacheFile.text // TO-DO
 				}
 				if (r0==-1) { //deliver whole file
 					response.setHeader("Content-Length",cacheFile.length().toString())
@@ -120,7 +119,7 @@ class FileController {
 			//specify content length
 			AmazonS3Client s3=new AmazonS3Client()
 			try {
-				S3Object file=s3.getObject("rad-content",path)
+				S3Object file=s3.getObject(grailsApplication.mergedConfig.grails.plugin.awsfiles.bucket,path)
 				Date mod=file.getObjectMetadata().getLastModified()
 				long size=file.getObjectMetadata().getContentLength()
 				if (r0>-1) {
@@ -157,6 +156,7 @@ class FileController {
 				response.outputStream.flush()
 				if (fout!=null) fout.close()
 			} catch (Exception e) {
+				println e
 				println("S3 Retrieval Failed For:"+path)
 				//e.printStackTrace()
 			}
@@ -167,7 +167,7 @@ class FileController {
 	}
 
 	def getCacheFile(String path) {
-		String cachedir = grailsApplication.mergedConfig.grails.plugin.awsfiles.cacheLocation;
+		String cachedir = cacheService.getLoc();
 		def dir0=null
 		if (cachedir.startsWith("/") || cachedir.indexOf(":/")==1) {
 			dir0=cachedir

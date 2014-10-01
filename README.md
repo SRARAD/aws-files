@@ -55,6 +55,12 @@ A use case is rendring markdown files inline. If `MyFile.md` is requested the fi
 
 **Default** - ['html': 'md']
 
+### bucket
+
+The name of the AWS S3 bucket serving as the virtual directory.
+
+**Default** - 'example'
+
 ### bufferSize
 
 The size of the buffer used to retrieve files from S3 in bytes.

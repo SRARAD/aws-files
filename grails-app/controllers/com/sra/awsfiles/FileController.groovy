@@ -88,17 +88,17 @@ class FileController {
 				int posdot=path.lastIndexOf(".")
 				def transformed=getCacheFile(path.substring(0,posdot)+"."+transform[fileEnding])
 				if (transformed.exists()) {
-					return transformed.text // TO-DO
+					return ['content': transformed.text, type: fileEnding]
 				}
 			}
 			def cacheFile=getCacheFile(path)
 			if (cacheFile.exists()) {
 				if (transform[fileEnding]) {
-					return cacheFile.text // TO-DO
+					return ['content': cacheFile.text, type: fileEnding]
 				}
 				if (r0==-1) { //deliver whole file
 					response.setHeader("Content-Length",cacheFile.length().toString())
-					int bufsize=500000 //500K
+					int bufsize=grailsApplication.mergedConfig.grails.plugin.awsfiles.bufferSize
 					if (cacheFile.length()<bufsize) bufsize=cacheFile.length()
 					byte[] buf=new byte[bufsize]
 					int len=-1

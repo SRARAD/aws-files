@@ -150,7 +150,7 @@ class CacheService {
 		try {
 			S3Object file=s3.getObject(bucket,key)
 			InputStream in0=file.getObjectContent()
-			int bufsize=1000000 //1M
+			int bufsize=grailsApplication.mergedConfig.grails.plugin.awsfiles.bufferSize
 			if (size<bufsize) bufsize=size //or length of object if smaller
 			byte[] buf=new byte[bufsize]
 			int len=-1

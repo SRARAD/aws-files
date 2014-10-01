@@ -5,7 +5,8 @@ class AwsFilesGrailsPlugin {
     def grailsVersion = "2.3 > *"
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
-        "grails-app/views/error.gsp"
+        "grails-app/views/error.gsp",
+        "grails-app/views/file/get.gsp"
     ]
 
     // TODO Fill in these fields
@@ -13,11 +14,11 @@ class AwsFilesGrailsPlugin {
     def author = "Scott Bennett"
     def authorEmail = "scott_bennett@sra.com"
     def description = '''\
-SRA plugin for storing files on AWS S3 and piping them through the application.
+SRA plugin for storing files on AWS S3, caching them locally, and piping them through the application.
 '''
 
     // URL to the plugin's documentation
-    def documentation = "http://grails.org/plugin/aws-files"
+    def documentation = "https://git.srarad.com/rad/aws-files"
 
     // Extra (optional) plugin metadata
 
@@ -25,10 +26,10 @@ SRA plugin for storing files on AWS S3 and piping them through the application.
 //    def license = "APACHE"
 
     // Details of company behind the plugin (if there is one)
-//    def organization = [ name: "My Company", url: "http://www.my-company.com/" ]
+    def organization = [ name: "SRA", url: "http://www.sra.com/" ]
 
     // Any additional developers beyond the author specified above.
-//    def developers = [ [ name: "Joe Bloggs", email: "joe@bloggs.net" ]]
+    def developers = [ [ name: "Brian Conn", email: "brian_conn@sra.com" ]]
 
     // Location of the plugin's issue tracker.
 //    def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPMYPLUGIN" ]

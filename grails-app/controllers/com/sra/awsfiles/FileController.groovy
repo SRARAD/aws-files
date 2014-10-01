@@ -132,7 +132,7 @@ class FileController {
 				if (r0>0) {
 					in0.skip(r0) //possible skip (if supported)
 				}
-				int bufsize=500000 //500K
+				int bufsize=grailsApplication.mergedConfig.grails.plugin.awsfiles.bufferSize
 				if (size<bufsize) bufsize=size //or size of file whichever is smaller
 				byte[] buf=new byte[bufsize]
 				int len=-1
@@ -156,12 +156,10 @@ class FileController {
 				response.outputStream.flush()
 				if (fout!=null) fout.close()
 			} catch (Exception e) {
-				println e
 				println("S3 Retrieval Failed For:"+path)
 				//e.printStackTrace()
 			}
 		} catch (Exception e) {
-			println e
 			println("File Retrieval Failed For:"+path)
 		}
 	}

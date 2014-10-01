@@ -88,13 +88,13 @@ class FileController {
 				int posdot=path.lastIndexOf(".")
 				def transformed=getCacheFile(path.substring(0,posdot)+"."+transform[fileEnding])
 				if (transformed.exists()) {
-					return ['content': transformed.text, type: fileEnding]
+					return ['content': transformed.text, type: transform[fileEnding]]
 				}
 			}
 			def cacheFile=getCacheFile(path)
 			if (cacheFile.exists()) {
 				if (transform[fileEnding]) {
-					return ['content': cacheFile.text, type: fileEnding]
+					return ['content': cacheFile.text, type: transform[fileEnding]]
 				}
 				if (r0==-1) { //deliver whole file
 					response.setHeader("Content-Length",cacheFile.length().toString())

@@ -10,7 +10,7 @@ class AwsFilesGrailsPlugin {
     ]
 
     // TODO Fill in these fields
-    def title = "Aws Files Plugin" // Headline display name of the plugin
+    def title = "AWS Files Plugin" // Headline display name of the plugin
     def author = "Scott Bennett"
     def authorEmail = "scott_bennett@sra.com"
     def description = '''\

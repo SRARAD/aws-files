@@ -21,7 +21,7 @@ log4j = {
            'net.sf.ehcache.hibernate'
 }
 
-grails.plugins.awsfiles.bucket = 'rad-content'
+grails.plugin.awsfiles.bucket = 'rad-content'
 
 if (System.properties.getProperty("radcache")) {
 	grails.plugin.awsfiles.cacheLocation = System.properties.getProperty("radcache")

@@ -67,3 +67,13 @@ The name of the AWS S3 bucket serving as the virtual directory.
 The size of the buffer used to retrieve files from S3 in bytes.
 
 **Default** - 1000000
+
+### encrypt
+
+Boolean for if the files in S3 are encrypted.
+
+**Default** - false
+
+### key
+
+Encryption key for files in S3. Required if **encrypt** is true.

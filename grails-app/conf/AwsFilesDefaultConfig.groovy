@@ -9,6 +9,7 @@ grails {
 			transform = ['html': 'md']
 			bucket = 'example'
 			bufferSize = 1000000
+			encrypt = false
 		}
 	}
 }

@@ -6,6 +6,16 @@ import com.amazonaws.services.s3.model.ObjectListing
 import com.amazonaws.services.s3.model.S3Object
 import com.sra.awsfiles.CacheRefreshJob
 
+import com.amazonaws.auth.AWSCredentialsProvider
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
+import com.amazonaws.services.s3.AmazonS3Client
+import com.amazonaws.services.s3.AmazonS3EncryptionClient
+import com.amazonaws.services.s3.model.EncryptionMaterials
+import com.amazonaws.services.s3.model.S3Object
+import javax.crypto.SecretKey
+import javax.crypto.spec.SecretKeySpec
+import org.apache.commons.codec.binary.Base64
+
 @Transactional
 class CacheService {
 
@@ -32,7 +42,7 @@ class CacheService {
 			return results//only allow one scan in progress
 		}
 		inProgress=true
-		def s3=new AmazonS3Client()
+		def s3=getS3Client();
 		ObjectListing list=null;
 		try {
 			while(true) {
@@ -146,7 +156,7 @@ class CacheService {
 	def refreshObject(String key,long size) {
 		def bucket = grailsApplication.mergedConfig.grails.plugin.awsfiles.bucket;
 		def results=""
-		def s3=new AmazonS3Client()
+		def s3=getS3Client();
 		try {
 			S3Object file=s3.getObject(bucket,key)
 			InputStream in0=file.getObjectContent()
@@ -182,5 +192,26 @@ class CacheService {
 	
 	def startJob() {
 		CacheRefreshJob.schedule(grailsApplication.mergedConfig.grails.plugin.awsfiles.refreshInterval)
+	}
+	
+	def getS3Client() {
+		boolean encrypt = grailsApplication.mergedConfig.grails.plugin.awsfiles.encrypt;
+		def client;
+		if (encrypt) {
+			def key = grailsApplication.mergedConfig.grails.plugin.awsfiles.key;
+			if (key != null) {
+				SecretKey skey = new SecretKeySpec(Base64.decodeBase64(key.getBytes()), "AES")
+				EncryptionMaterials materials = new EncryptionMaterials(skey)
+				AWSCredentialsProvider credprov = new DefaultAWSCredentialsProviderChain()
+				client = new AmazonS3EncryptionClient(credprov.getCredentials(), materials)
+			} else {
+				println "awsfiles.key must be defined to perform encrypted backups (use grails create-key command to generate one)"
+				println "backup not performed"
+				return
+			}
+		} else {
+			client = new AmazonS3Client();
+		}
+		return client;
 	}
 }

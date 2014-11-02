@@ -1,7 +1,7 @@
 package com.sra.awsfiles
 
-import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.S3Object
+
 
 class FileController {
 
@@ -117,16 +117,11 @@ class FileController {
 				}
 			}
 			//specify content length
-			AmazonS3Client s3=new AmazonS3Client()
+			def s3 = cacheService.getS3Client();
 			try {
 				S3Object file=s3.getObject(grailsApplication.mergedConfig.grails.plugin.awsfiles.bucket,path)
 				Date mod=file.getObjectMetadata().getLastModified()
 				long size=file.getObjectMetadata().getContentLength()
-				if (r0>-1) {
-					response.setHeader("Content-Length",rsize.toString())
-				} else {
-					response.setHeader("Content-Length",size.toString())
-				}
 				//println("path="+path+" mod date="+mod+" size="+size)
 				InputStream in0=file.getObjectContent()
 				if (r0>0) {

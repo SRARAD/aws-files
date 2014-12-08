@@ -128,7 +128,7 @@ class CacheService {
 						cacheFile.delete() //delete it as soon as we notice
 						println(key+" size="+size+" "+local)
 						//results+="<li>"+key+" size="+size+" "+local+"</li>"
-						results+=refreshObject(key,size)
+						results+=refreshObject(key)
 					} else {
 						local="cache up to date"
 					}
@@ -136,19 +136,20 @@ class CacheService {
 					local="no cache"
 					println(key+" size="+size+" "+local)
 					//results+="<li>"+key+" size="+size+" "+local+"</li>"
-					results+=refreshObject(key,size)
+					results+=refreshObject(key)
 				}
 			}
 		}
 		return(results)
 	}
 
-	def refreshObject(String key,long size) {
+	def refreshObject(String key) {
 		def bucket = grailsApplication.mergedConfig.grails.plugin.awsfiles.bucket;
 		def results=""
 		def s3=new AmazonS3Client()
 		try {
 			S3Object file=s3.getObject(bucket,key)
+			long size = file.getObjectMetadata().getContentLength();
 			InputStream in0=file.getObjectContent()
 			int bufsize=grailsApplication.mergedConfig.grails.plugin.awsfiles.bufferSize
 			if (size<bufsize) bufsize=size //or length of object if smaller

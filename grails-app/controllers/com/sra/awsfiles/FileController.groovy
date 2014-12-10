@@ -76,12 +76,10 @@ class FileController {
 			//specify content disposition
 			//inline = play in browser
 			//attachment = download
-			String type="attachment"
 			def inlineTypes = grailsApplication.mergedConfig.grails.plugin.awsfiles.inline;
-			if (inlineTypes.any { filename.toLowerCase().endsWith("." + it) }) {
-				type="inline"
+			if (!inlineTypes.any { filename.toLowerCase().endsWith("." + it) }) {
+				response.setHeader("Content-disposition","attachment;filename="+filename);
 			}
-			response.setHeader("Content-disposition",type+";filename="+filename)
 			def transform = grailsApplication.mergedConfig.grails.plugin.awsfiles.transform;
 			def fileEnding = filename.toLowerCase().split("\\.").last();
 			if (transform[fileEnding]) {

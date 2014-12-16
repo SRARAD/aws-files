@@ -15,6 +15,7 @@ import com.amazonaws.services.s3.model.S3Object
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 import org.apache.commons.codec.binary.Base64
+import groovy.io.FileType
 
 @Transactional
 class CacheService {
@@ -22,7 +23,7 @@ class CacheService {
 	def grailsApplication
 	def inProgress=false
 
-			def updateCache() {
+	def updateCache() {
 		def results="" 
 		long t0=System.currentTimeMillis()
 		def cachedir=getLoc();
@@ -44,15 +45,21 @@ class CacheService {
 		inProgress=true
 		def s3=getS3Client();
 		ObjectListing list=null;
+		Collection<String> files = [];
 		try {
 			while(true) {
 				list=s3.listObjects(grailsApplication.mergedConfig.grails.plugin.awsfiles.bucket)
-				results+=processObjects(list)
+				Map resultMap = processObjects(list);
+				results += resultMap.results;
+				files += resultMap.files
 				if (list.isTruncated()) {
-					list=s3.listNextBatchOfObjects(list)
+					list=s3.listNextBatchOfObjects(list);
 				} else {
 					break;
 				}
+			}
+			if (grailsApplication.mergedConfig.grails.plugin.awsfiles.cacheSync) {
+				crawlLocalCache(files);
 			}
 		} catch (Exception e) {
 			e.printStackTrace()
@@ -67,6 +74,34 @@ class CacheService {
 		float dif1=((int)(dif/10))/100
 		results+="<li>Total time to sweep S3 and compare: "+dif1+" seconds</li>"
 		return(results)
+	}
+	
+	void crawlLocalCache(Collection<String> files) {
+		File root = getRootDir();
+		String rootDir = root.toString();
+		root.eachFileRecurse (FileType.FILES) { file ->
+			String path = file.toString() - (rootDir + '/');
+			if (!files.contains(path)) {
+				println path + ' deleting, no longer in S3';
+				file.delete();
+			}
+		}
+		int num = 1;
+		while (num != 0) {
+			num = cleanEmptyDirs(root);
+		}
+	}
+	
+	int cleanEmptyDirs(File root) {
+		Collection<File> empty = [];
+		root.eachFileRecurse (FileType.DIRECTORIES) { dir ->
+			if (dir.list().size() == 0) {
+				empty.push(dir);
+			}
+		}
+		int num = empty.size();
+		empty.each { it.delete() };
+		return num;
 	}
 
 	def getCacheFile(String path) {
@@ -112,11 +147,13 @@ class CacheService {
 		["cacheDirFile":dir1,"filedir":filedir,"stem":stem,"file":new File(dir0+"/"+path)]
 	}
 
-	def processObjects(ObjectListing list) {
-		def results=""
+	Map processObjects(ObjectListing list) {
+		String results="";
+		Collection<String> files = [];
 		list.getObjectSummaries().each { obj ->
-			String key=obj.getKey()
+			String key=obj.getKey();
 			if (!key.endsWith("/")) {
+				files.push(key);
 				long size=obj.getSize()
 				Date mod=obj.getLastModified()
 				File cacheFile=getCacheFile(key)
@@ -143,7 +180,7 @@ class CacheService {
 				}
 			}
 		}
-		return(results)
+		return([files: files, results: results])
 	}
 
 	def refreshObject(String key) {

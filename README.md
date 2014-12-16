@@ -30,6 +30,12 @@ Path of where cached files are stored. Only used if **cache** is true.
 
 **Default** - 'cache'
 
+### cacheSync
+
+Turning on cacheSync keeps the local cache in sync with the remote bucket, not just up to date with the latest files. This means the plugin will **delete local files which are not in S3**. Make sure the **cacheLocation** is for cache items only, otherwise the other items will be deleted.
+
+**Default** - false
+
 ### rangeSupprt
 
 Boolean for if byte range support is on.
@@ -59,8 +65,6 @@ A use case is rendring markdown files inline. If `MyFile.md` is requested the fi
 ### bucket
 
 The name of the AWS S3 bucket serving as the virtual directory.
-
-**Default** - 'example'
 
 ### bufferSize
 

@@ -22,7 +22,7 @@ class CacheService {
 	def grailsApplication
 	def inProgress=false
 
-	def updateCache() {
+			def updateCache() {
 		def results="" 
 		long t0=System.currentTimeMillis()
 		def cachedir=getLoc();
@@ -70,14 +70,8 @@ class CacheService {
 	}
 
 	def getCacheFile(String path) {
-		def cachedir=getLoc();
-		def dir0=null
-		if (cachedir.startsWith("/") || cachedir.indexOf(":/")==1) {
-			dir0=cachedir
-		} else {
-			dir0=grailsApplication.parentContext.getResource(cachedir).file.toString()
-		}
-		def dir
+		String dir0 = getRootDir();
+		File dir;
 		int pos=path.lastIndexOf("/")
 		if (pos>-1) {
 			dir=new File(dir0+"/"+path.substring(0,pos))
@@ -90,16 +84,15 @@ class CacheService {
 		def file=new File(dir0+"/"+path)
 		return(file)
 	}
+	
+	String getRootDir() {
+		String cachedir = getLoc();
+		return (cachedir.startsWith("/") || cachedir.indexOf(":/") == 1) ? cachedir : grailsApplication.parentContext.getResource(cachedir).file.toString();
+	}
 
 	def getCacheInfo(String path) {
-		def cachedir=getLoc();
-		def dir1=null
-		if (cachedir.startsWith("/") || cachedir.indexOf(":/")==1) {
-			dir1=new File(cachedir)
-		} else {
-			dir1=grailsApplication.parentContext.getResource(cachedir).file
-		}
-		def dir0=dir1.toString()
+		String dir0 = getRootDir();
+		File dir1 = grailsApplication.parentContext.getResource(dir0).file;
 		def dir
 		int pos=path.lastIndexOf("/")
 		String filedir=null
@@ -187,8 +180,8 @@ class CacheService {
 		return(results)
 	}
 	
-	def getLoc() {
-		grailsApplication.mergedConfig.grails.plugin.awsfiles.cacheLocation
+	String getLoc() {
+		return grailsApplication.mergedConfig.grails.plugin.awsfiles.cacheLocation;
 	}
 	
 	def startJob() {

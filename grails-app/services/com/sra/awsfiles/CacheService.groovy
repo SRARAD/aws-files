@@ -70,7 +70,7 @@ class CacheService {
 	}
 
 	def getCacheFile(String path) {
-		String dir0 = getRootDir();
+		String dir0 = getRootDir().toString();
 		File dir;
 		int pos=path.lastIndexOf("/")
 		if (pos>-1) {
@@ -85,14 +85,14 @@ class CacheService {
 		return(file)
 	}
 	
-	String getRootDir() {
+	File getRootDir() {
 		String cachedir = getLoc();
-		return (cachedir.startsWith("/") || cachedir.indexOf(":/") == 1) ? cachedir : grailsApplication.parentContext.getResource(cachedir).file.toString();
+		return (cachedir.startsWith("/") || cachedir.indexOf(":/") == 1) ? new File(cachedir) : grailsApplication.parentContext.getResource(cachedir).file;
 	}
 
 	def getCacheInfo(String path) {
-		String dir0 = getRootDir();
-		File dir1 = grailsApplication.parentContext.getResource(dir0).file;
+		File dir1 = getRootDir();
+		String dir0 = dir1.toString();
 		def dir
 		int pos=path.lastIndexOf("/")
 		String filedir=null

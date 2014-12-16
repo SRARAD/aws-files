@@ -80,7 +80,7 @@ class CacheService {
 		File root = getRootDir();
 		String rootDir = root.toString();
 		root.eachFileRecurse (FileType.FILES) { file ->
-			String path = file.toString() - (rootDir + '/');
+			String path = (file.toString() - (rootDir))[1..-1];
 			if (!files.contains(path)) {
 				println path + ' deleting, no longer in S3';
 				file.delete();

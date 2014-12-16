@@ -33,7 +33,7 @@ class CacheService {
 		} else {
 			dir1=grailsApplication.parentContext.getResource(cachedir).file
 		}
-		def dir0=dir1.toString()
+		def dir0=dir1.path
 		results+="<li>Using Local Cache Directory: "+dir0+"</li>"
 		results+="<li>Using S3 Bucket: "+grailsApplication.mergedConfig.grails.plugin.awsfiles.bucket+"</li>"
 		println("Calling updateCache...")
@@ -78,10 +78,10 @@ class CacheService {
 	
 	void crawlLocalCache(Collection<String> files) {
 		File root = getRootDir();
-		String rootDir = root.toString();
+		String rootDir = root.path;
 		root.eachFileRecurse (FileType.FILES) { file ->
-			String path = (file.toString() - (rootDir))[1..-1];
-			if (!files.contains(path)) {
+			String path = (file.path - (rootDir))[1..-1];
+			if (!files.contains(path.replaceAll('\\\\', '/'))) {
 				println path + ' deleting, no longer in S3';
 				file.delete();
 			}
@@ -105,7 +105,7 @@ class CacheService {
 	}
 
 	def getCacheFile(String path) {
-		String dir0 = getRootDir().toString();
+		String dir0 = getRootDir().path;
 		File dir;
 		int pos=path.lastIndexOf("/")
 		if (pos>-1) {
@@ -127,7 +127,7 @@ class CacheService {
 
 	def getCacheInfo(String path) {
 		File dir1 = getRootDir();
-		String dir0 = dir1.toString();
+		String dir0 = dir1.path;
 		def dir
 		int pos=path.lastIndexOf("/")
 		String filedir=null

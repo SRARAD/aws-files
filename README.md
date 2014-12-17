@@ -16,7 +16,7 @@ SRA plugin for storing files on AWS S3, caching them locally, and piping them th
 
 ## Config
 
-All config items can be overwritten in **Config.groovy** by prepending `grails.plugin.awsfile.` onto the option name.
+All config items can be overwritten in **Config.groovy** by prepending `grails.plugin.awsfiles.` onto the option name.
 
 ### cache
 

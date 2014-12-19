@@ -6,6 +6,7 @@ SRA plugin for storing files on AWS S3, caching them locally, and piping them th
 ## Setup
 
 - Add `"/file/$path**"(controller:"file/get")` to **UrlMappings.groovy**
+- Set `"/file/**"` to `permitAll` in **Config.groovy** under Spring Security
 - Change **bucket** to the appropriate AWS S3 bucket name.
 - Customize any other default configs by following the instructions below
   - If **cache** is true and you want the cache to regularly update inject `cacheService` into **BootStrap.groovy** and call `cacheService.startJob()` at the end of `init`

@@ -37,7 +37,7 @@ Turning on cacheSync keeps the local cache in sync with the remote bucket, not j
 
 **Default** - false
 
-### rangeSupprt
+### rangeSupport
 
 Boolean for if byte range support is on.
 

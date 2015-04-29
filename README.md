@@ -1,7 +1,7 @@
 AWS File Plugin
 =========
 
-SRA plugin for storing files on AWS S3, caching them locally, and piping them through the application.
+Grails plugin for storing files on AWS S3, caching them locally, and piping them through the application.
 
 ## Setup
 

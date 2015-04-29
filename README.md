@@ -59,7 +59,7 @@ Array of file endings for file types which will be rendered inline in the browse
 
 Map of file endings to file endings of file types whose file ending will be changed during retrieval. For example, if **html** is mapped to **md** and **MyFile.html** is requested the plugin will look for a file named **MyFile.md** and if it exists the plugin will return a map of the contents of **MyFile.md** and the real file ending of the file. The form of the map returned is `[contents: fileContents, type: fileEnding]` where **fileContents** is the file contents and **fileEnding** is the real file ending.
 
-A use case is rendring markdown files inline. If `MyFile.md` is requested the file will be downloaded because markdown files can not be rendered inline by the browser. To get around this **html** can be mapped to **md** and when `MyFile.html` is requested the contents of `MyFile.md` will be returned. This contents can then be sent to the **get.gsp** page where it can be rendered based on the real file type.
+A use case is rendering markdown files inline. If `MyFile.md` is requested the file will be downloaded because markdown files can not be rendered inline by the browser. To get around this **html** can be mapped to **md** and when `MyFile.html` is requested the contents of `MyFile.md` will be returned. This contents can then be sent to the **get.gsp** page where it can be rendered based on the real file type.
 
 **Default** - ['html': 'md']
 

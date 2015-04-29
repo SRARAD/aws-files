@@ -14,7 +14,7 @@ class AwsFilesGrailsPlugin {
     def author = "Scott Bennett"
     def authorEmail = "scott_bennett@sra.com"
     def description = '''\
-SRA plugin for storing files on AWS S3, caching them locally, and piping them through the application.
+Grails plugin for storing files on AWS S3, caching them locally, and piping them through the application.
 '''
 
     // URL to the plugin's documentation

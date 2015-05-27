@@ -2,22 +2,6 @@ grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 
-grails.project.repos.default = "SRA"
-
-def config = new ConfigSlurper(grailsSettings.grailsEnv).parse(new File("../UserConfig.groovy").toURI().toURL())
-
-grails {
-	project {
-		repos {
-			SRA {
-				url = ""
-				username = config.artifactory.username
-				password = config.artifactory.password
-			}
-		}
-	}
-}
-
 grails.project.fork = [
     // configure settings for compilation JVM, note that if you alter the Groovy version forked compilation is required
     //  compile: [maxMemory: 256, minMemory: 64, debug: false, maxPerm: 256, daemon:true],

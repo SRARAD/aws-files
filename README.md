@@ -82,3 +82,7 @@ Boolean for if the files in S3 are encrypted.
 ### key
 
 Encryption key for files in S3. Required if **encrypt** is true.
+
+## License
+
+**AWS Files** has been released under the MIT license by [SRA International, INC](https://www.sra.com/). It was originally developed specifically for the [SRA Rapid Application Development Team](https://github.com/SRARAD).

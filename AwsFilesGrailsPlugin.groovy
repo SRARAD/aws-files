@@ -10,12 +10,10 @@ class AwsFilesGrailsPlugin {
     ]
 
     // TODO Fill in these fields
-    def title = "AWS Files Plugin" // Headline display name of the plugin
+    def title = "AWS Files" // Headline display name of the plugin
     def author = "Scott Bennett"
-    def authorEmail = "scott_bennett@sra.com"
-    def description = '''\
-Grails plugin for storing files on AWS S3, caching them locally, and piping them through the application.
-'''
+    def authorEmail = "swb1701@gmail.com"
+    def description = 'Grails plugin for storing files on AWS S3, caching them locally, and piping them through the application.'
 
     // URL to the plugin's documentation
     def documentation = "https://git.srarad.com/rad/aws-files"
@@ -23,19 +21,19 @@ Grails plugin for storing files on AWS S3, caching them locally, and piping them
     // Extra (optional) plugin metadata
 
     // License: one of 'APACHE', 'GPL2', 'GPL3'
-//    def license = "APACHE"
+    def license = "MIT"
 
     // Details of company behind the plugin (if there is one)
     def organization = [ name: "SRA", url: "http://www.sra.com/" ]
 
     // Any additional developers beyond the author specified above.
-    def developers = [ [ name: "Brian Conn", email: "brian_conn@sra.com" ]]
+    def developers = [[ name: "TheConnMan", email: "brian@theconnman.com" ], [ name: "Ahmad Yasin", email: "ayasein@gmail.com" ]]
 
     // Location of the plugin's issue tracker.
-//    def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPMYPLUGIN" ]
+    def issueManagement = [ system: "GitHub", url: "https://github.com/SRARAD/aws-files/issues" ]
 
     // Online location of the plugin's browseable source code.
-//    def scm = [ url: "http://svn.codehaus.org/grails-plugins/" ]
+    def scm = [ url: "https://github.com/SRARAD/aws-files" ]
 
     def doWithWebDescriptor = { xml ->
         // TODO Implement additions to web.xml (optional), this event occurs before

@@ -11,6 +11,8 @@ class FileController {
 	static def typeMap=['doc':'application/msword',
 		'png':'image/png',
 		'jpg':'image/jpg',
+		'xml':'application/xml',
+		'json':'application/json',
 		'pdf':'application/pdf',
 		'docx':'application/msword',
 		'webm':'video/webm',
@@ -72,16 +74,14 @@ class FileController {
 				filename=path.substring(pos+1)
 			}
 			//set content type
-			response.contentType=fileNameToMime(filename)
 			//specify content disposition
 			//inline = play in browser
 			//attachment = download
-			String type="attachment"
 			def inlineTypes = grailsApplication.mergedConfig.grails.plugin.awsfiles.inline;
-			if (inlineTypes.any { filename.toLowerCase().endsWith("." + it) }) {
-				type="inline"
+			if (!inlineTypes.any { filename.toLowerCase().endsWith("." + it) }) {
+				response.contentType=fileNameToMime(filename)
+				response.setHeader("Content-disposition","attachment;filename="+filename);
 			}
-			response.setHeader("Content-disposition",type+";filename="+filename)
 			def transform = grailsApplication.mergedConfig.grails.plugin.awsfiles.transform;
 			def fileEnding = filename.toLowerCase().split("\\.").last();
 			if (transform[fileEnding]) {

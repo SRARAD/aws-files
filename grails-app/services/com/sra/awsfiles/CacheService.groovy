@@ -15,6 +15,7 @@ import com.amazonaws.services.s3.model.S3Object
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 import org.apache.commons.codec.binary.Base64
+import groovy.io.FileType
 
 @Transactional
 class CacheService {
@@ -32,7 +33,7 @@ class CacheService {
 		} else {
 			dir1=grailsApplication.parentContext.getResource(cachedir).file
 		}
-		def dir0=dir1.toString()
+		def dir0=dir1.path
 		results+="<li>Using Local Cache Directory: "+dir0+"</li>"
 		results+="<li>Using S3 Bucket: "+grailsApplication.mergedConfig.grails.plugin.awsfiles.bucket+"</li>"
 		println("Calling updateCache...")
@@ -44,15 +45,21 @@ class CacheService {
 		inProgress=true
 		def s3=getS3Client();
 		ObjectListing list=null;
+		Collection<String> files = [];
 		try {
 			while(true) {
 				list=s3.listObjects(grailsApplication.mergedConfig.grails.plugin.awsfiles.bucket)
-				results+=processObjects(list)
+				Map resultMap = processObjects(list);
+				results += resultMap.results;
+				files += resultMap.files
 				if (list.isTruncated()) {
-					list=s3.listNextBatchOfObjects(list)
+					list=s3.listNextBatchOfObjects(list);
 				} else {
 					break;
 				}
+			}
+			if (grailsApplication.mergedConfig.grails.plugin.awsfiles.cacheSync) {
+				crawlLocalCache(files);
 			}
 		} catch (Exception e) {
 			e.printStackTrace()
@@ -68,16 +75,38 @@ class CacheService {
 		results+="<li>Total time to sweep S3 and compare: "+dif1+" seconds</li>"
 		return(results)
 	}
+	
+	void crawlLocalCache(Collection<String> files) {
+		File root = getRootDir();
+		String rootDir = root.path;
+		root.eachFileRecurse (FileType.FILES) { file ->
+			String path = (file.path - (rootDir))[1..-1];
+			if (!files.contains(path.replaceAll('\\\\', '/'))) {
+				println path + ' deleting, no longer in S3';
+				file.delete();
+			}
+		}
+		int num = 1;
+		while (num != 0) {
+			num = cleanEmptyDirs(root);
+		}
+	}
+	
+	int cleanEmptyDirs(File root) {
+		Collection<File> empty = [];
+		root.eachFileRecurse (FileType.DIRECTORIES) { dir ->
+			if (dir.list().size() == 0) {
+				empty.push(dir);
+			}
+		}
+		int num = empty.size();
+		empty.each { it.delete() };
+		return num;
+	}
 
 	def getCacheFile(String path) {
-		def cachedir=getLoc();
-		def dir0=null
-		if (cachedir.startsWith("/") || cachedir.indexOf(":/")==1) {
-			dir0=cachedir
-		} else {
-			dir0=grailsApplication.parentContext.getResource(cachedir).file.toString()
-		}
-		def dir
+		String dir0 = getRootDir().path;
+		File dir;
 		int pos=path.lastIndexOf("/")
 		if (pos>-1) {
 			dir=new File(dir0+"/"+path.substring(0,pos))
@@ -90,16 +119,15 @@ class CacheService {
 		def file=new File(dir0+"/"+path)
 		return(file)
 	}
+	
+	File getRootDir() {
+		String cachedir = getLoc();
+		return (cachedir.startsWith("/") || cachedir.indexOf(":/") == 1) ? new File(cachedir) : grailsApplication.parentContext.getResource(cachedir).file;
+	}
 
 	def getCacheInfo(String path) {
-		def cachedir=getLoc();
-		def dir1=null
-		if (cachedir.startsWith("/") || cachedir.indexOf(":/")==1) {
-			dir1=new File(cachedir)
-		} else {
-			dir1=grailsApplication.parentContext.getResource(cachedir).file
-		}
-		def dir0=dir1.toString()
+		File dir1 = getRootDir();
+		String dir0 = dir1.path;
 		def dir
 		int pos=path.lastIndexOf("/")
 		String filedir=null
@@ -119,11 +147,13 @@ class CacheService {
 		["cacheDirFile":dir1,"filedir":filedir,"stem":stem,"file":new File(dir0+"/"+path)]
 	}
 
-	def processObjects(ObjectListing list) {
-		def results=""
+	Map processObjects(ObjectListing list) {
+		String results="";
+		Collection<String> files = [];
 		list.getObjectSummaries().each { obj ->
-			String key=obj.getKey()
+			String key=obj.getKey();
 			if (!key.endsWith("/")) {
+				files.push(key);
 				long size=obj.getSize()
 				Date mod=obj.getLastModified()
 				File cacheFile=getCacheFile(key)
@@ -138,7 +168,7 @@ class CacheService {
 						cacheFile.delete() //delete it as soon as we notice
 						println(key+" size="+size+" "+local)
 						//results+="<li>"+key+" size="+size+" "+local+"</li>"
-						results+=refreshObject(key,size)
+						results+=refreshObject(key)
 					} else {
 						local="cache up to date"
 					}
@@ -146,19 +176,20 @@ class CacheService {
 					local="no cache"
 					println(key+" size="+size+" "+local)
 					//results+="<li>"+key+" size="+size+" "+local+"</li>"
-					results+=refreshObject(key,size)
+					results+=refreshObject(key)
 				}
 			}
 		}
-		return(results)
+		return([files: files, results: results])
 	}
 
-	def refreshObject(String key,long size) {
+	def refreshObject(String key) {
 		def bucket = grailsApplication.mergedConfig.grails.plugin.awsfiles.bucket;
 		def results=""
 		def s3=getS3Client();
 		try {
 			S3Object file=s3.getObject(bucket,key)
+			long size = file.getObjectMetadata().getContentLength();
 			InputStream in0=file.getObjectContent()
 			int bufsize=grailsApplication.mergedConfig.grails.plugin.awsfiles.bufferSize
 			if (size<bufsize) bufsize=size //or length of object if smaller
@@ -186,8 +217,8 @@ class CacheService {
 		return(results)
 	}
 	
-	def getLoc() {
-		grailsApplication.mergedConfig.grails.plugin.awsfiles.cacheLocation
+	String getLoc() {
+		return grailsApplication.mergedConfig.grails.plugin.awsfiles.cacheLocation;
 	}
 	
 	def startJob() {
